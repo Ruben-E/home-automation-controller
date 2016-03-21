@@ -12,7 +12,9 @@ public class Logger {
     public Logger(SerialReaderObservable serialReaderObservable) {
         serialReaderObservable.getObservable()
                 .subscribe(
-                        System.out::println,
+                        pair -> {
+                            log.debug("Received data: " + pair);
+                        },
                         e -> {
                             log.warn("Got exception.", e);
                         });
