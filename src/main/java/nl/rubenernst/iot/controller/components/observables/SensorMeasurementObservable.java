@@ -41,6 +41,9 @@ public class SensorMeasurementObservable implements ControllerObservable {
 
                     return new Triplet<>(node, sensor, sensorMeasurement);
                 })
-                .share();
+                .share()
+                .doOnError(throwable -> {
+                    log.error("Got exception", throwable);
+                });
     }
 }

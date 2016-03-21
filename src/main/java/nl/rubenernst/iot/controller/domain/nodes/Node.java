@@ -23,6 +23,6 @@ public class Node {
     }
 
     public Optional<Sensor> getSensor(int id) {
-        return sensors.stream().filter(sensor -> sensor.getId() == id).findFirst();
+        return getSensors().stream().filter(sensor -> sensor.getId() == id).findFirst();
     }
 }

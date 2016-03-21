@@ -94,6 +94,9 @@ public class SerialReaderObservable implements ControllerObservable {
                 EXECUTOR_SERVICE.submit(() -> subscriber.onError(e));
             }
         });
-        this.observable = observable.share();
+        this.observable = observable.share()
+                .doOnError(throwable -> {
+                    log.error("Got exception", throwable);
+                });
     }
 }
