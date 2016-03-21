@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class Logger {
     @Autowired
     public Logger(SerialReaderObservable serialReaderObservable) {
-        serialReaderObservable.getSerialPortObservable()
+        serialReaderObservable.getObservable()
                 .subscribe(
                         System.out::println,
                         e -> {

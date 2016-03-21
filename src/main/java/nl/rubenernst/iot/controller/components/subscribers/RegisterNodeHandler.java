@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 public class RegisterNodeHandler {
     @Autowired
     public RegisterNodeHandler(SerialReaderObservable serialReaderObservable, NodeManager nodeManager) {
-        serialReaderObservable.getSerialPortObservable()
+        serialReaderObservable.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.PRESENTATION &&

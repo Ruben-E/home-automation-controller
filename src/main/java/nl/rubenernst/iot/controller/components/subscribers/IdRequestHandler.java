@@ -19,7 +19,7 @@ import java.io.OutputStream;
 public class IdRequestHandler {
     @Autowired
     public IdRequestHandler(SerialReaderObservable serialReaderObservable, ResponseHandler responseHandler, NodeManager nodeManager) {
-        serialReaderObservable.getSerialPortObservable()
+        serialReaderObservable.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.INTERNAL && message.getMessageSubType() == InternalMessageSubType.I_ID_REQUEST;

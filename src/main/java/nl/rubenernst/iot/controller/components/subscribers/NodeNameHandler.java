@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class NodeNameHandler {
     @Autowired
     public NodeNameHandler(SerialReaderObservable serialReaderObservable, NodeManager nodeManager) {
-        serialReaderObservable.getSerialPortObservable()
+        serialReaderObservable.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.INTERNAL &&

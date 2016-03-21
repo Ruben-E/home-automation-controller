@@ -18,13 +18,13 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class SensorMeasurementObservable {
+public class SensorMeasurementObservable implements ControllerObservable {
     @Getter
     private Observable<Triplet<Node, Optional<Sensor>, SensorMeasurement>> observable;
 
     @Autowired
     public SensorMeasurementObservable(SerialReaderObservable serialReaderObservable, NodeManager nodeManager) {
-        observable = serialReaderObservable.getSerialPortObservable()
+        observable = serialReaderObservable.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.SET &&

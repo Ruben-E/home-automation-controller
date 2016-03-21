@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 public class NodeVersionHandler {
     @Autowired
     public NodeVersionHandler(SerialReaderObservable serialReaderObservable, NodeManager nodeManager) {
-        serialReaderObservable.getSerialPortObservable()
+        serialReaderObservable.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.INTERNAL &&
