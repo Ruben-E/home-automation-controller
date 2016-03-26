@@ -11,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -27,8 +28,11 @@ public class EthernetGatewayObservable implements GatewayObservable {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             SOCKET_LISTENER.submit(() -> {
                 try {
-                    Socket socket = new Socket(gatewayIp, gatewayPort);
+                    log.info("Connecting to [{}] on port [{}]", gatewayIp, gatewayPort);
+
+                    Socket socket = new Socket();
                     socket.setKeepAlive(true);
+                    socket.connect(new InetSocketAddress(gatewayIp, gatewayPort), 5000);
                     if (socket.isConnected()) {
                         OutputStream outputStream = socket.getOutputStream();
                         InputStream inputStream = socket.getInputStream();
