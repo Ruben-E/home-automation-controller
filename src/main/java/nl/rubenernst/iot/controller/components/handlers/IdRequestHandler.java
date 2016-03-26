@@ -1,14 +1,14 @@
-package nl.rubenernst.iot.controller.components.subscribers;
+package nl.rubenernst.iot.controller.components.handlers;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.components.ResponseHandler;
-import nl.rubenernst.iot.controller.components.observables.SerialReaderObservable;
+import nl.rubenernst.iot.controller.components.observables.gateway.GatewayObservable;
 import nl.rubenernst.iot.controller.domain.messages.InternalMessage;
 import nl.rubenernst.iot.controller.domain.messages.InternalMessageSubType;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.MessageType;
 import nl.rubenernst.iot.controller.domain.nodes.Node;
-import nl.rubenernst.iot.controller.nodes.NodeManager;
+import nl.rubenernst.iot.controller.data.NodeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,8 +18,8 @@ import java.io.OutputStream;
 @Slf4j
 public class IdRequestHandler {
     @Autowired
-    public IdRequestHandler(SerialReaderObservable serialReaderObservable, ResponseHandler responseHandler, NodeManager nodeManager) {
-        serialReaderObservable.getObservable()
+    public IdRequestHandler(GatewayObservable gateway, ResponseHandler responseHandler, NodeManager nodeManager) {
+        gateway.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.INTERNAL && message.getMessageSubType() == InternalMessageSubType.I_ID_REQUEST;

@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.components.observables;
+package nl.rubenernst.iot.controller.components.observables.gateway;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -9,8 +9,6 @@ import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.builder.MessageBuilder;
 import nl.rubenernst.iot.controller.exceptions.NoPortAvailableException;
 import org.javatuples.Pair;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import rx.Observable;
 
 import java.io.BufferedReader;
@@ -19,12 +17,9 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-@Component
 @Slf4j
-public class SerialReaderObservable implements ControllerObservable {
-    private static final ExecutorService EXECUTOR_SERVICE = Executors.newFixedThreadPool(10);
+public class SerialGatewayObservable implements GatewayObservable {
     private static final String PORT_NAMES[] = {
             "/dev/cu", // Mac OS X
             "/dev/usbdev", // Linux
@@ -36,8 +31,7 @@ public class SerialReaderObservable implements ControllerObservable {
     @Getter
     private Observable<Pair<Message, OutputStream>> observable;
 
-    @Autowired
-    public SerialReaderObservable(MessageBuilder messageBuilder) {
+    public SerialGatewayObservable(MessageBuilder messageBuilder, ExecutorService executorService) {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             try {
                 CommPortIdentifier portIdentifier = null;
@@ -75,7 +69,7 @@ public class SerialReaderObservable implements ControllerObservable {
                         try {
                             if (serialPortEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE && input.ready()) {
                                 String payload = input.readLine();
-                                EXECUTOR_SERVICE.submit(() -> {
+                                executorService.submit(() -> {
                                     List<Message> messages = messageBuilder.fromPayload(payload);
                                     for (Message message : messages) {
                                         subscriber.onNext(new Pair<>(message, output));
@@ -83,7 +77,7 @@ public class SerialReaderObservable implements ControllerObservable {
                                 });
                             }
                         } catch (Exception e) {
-                            EXECUTOR_SERVICE.submit(() -> subscriber.onError(e));
+                            executorService.submit(() -> subscriber.onError(e));
                         }
                     });
                     serialPort.notifyOnDataAvailable(true);
@@ -91,7 +85,7 @@ public class SerialReaderObservable implements ControllerObservable {
                     throw new NoPortAvailableException("There is no port available");
                 }
             } catch (Exception e) {
-                EXECUTOR_SERVICE.submit(() -> subscriber.onError(e));
+                executorService.submit(() -> subscriber.onError(e));
             }
         });
         this.observable = observable.share()

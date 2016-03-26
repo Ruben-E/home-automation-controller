@@ -1,8 +1,8 @@
-package nl.rubenernst.iot.controller.components.subscribers;
+package nl.rubenernst.iot.controller.components.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.components.observables.SensorMeasurementObservable;
+import nl.rubenernst.iot.controller.components.observables.measurements.SensorMeasurementObservable;
 import nl.rubenernst.iot.controller.domain.Measurement;
 import nl.rubenernst.iot.controller.domain.nodes.Node;
 import nl.rubenernst.iot.controller.domain.nodes.Sensor;
@@ -23,22 +23,24 @@ import java.util.Optional;
 @Slf4j
 public class SensorMeasurementHandler {
     @Autowired
-    public SensorMeasurementHandler(SensorMeasurementObservable sensorMeasurementObservable, TransportClient transportClient, ObjectMapper objectMapper) throws CannotPutMappingException {
-        putMapping(transportClient);
+    public SensorMeasurementHandler(boolean elasticSearchEnabled, SensorMeasurementObservable sensorMeasurementObservable, TransportClient transportClient, ObjectMapper objectMapper) throws CannotPutMappingException {
+        if (elasticSearchEnabled) {
+            putMapping(transportClient);
 
-        sensorMeasurementObservable.getObservable()
-                .subscribe(triplet -> {
-                    try {
-                        Measurement measurement = getMeasurement(triplet);
+            sensorMeasurementObservable.getObservable()
+                    .subscribe(triplet -> {
+                        try {
+                            Measurement measurement = getMeasurement(triplet);
 
-                        transportClient.prepareIndex("measurements", "measurement")
-                                .setOpType(IndexRequest.OpType.CREATE)
-                                .setSource(objectMapper.writeValueAsString(measurement))
-                                .get();
-                    } catch (Exception e) {
-                        log.error("Cannot write to elasticsearch", e);
-                    }
-                });
+                            transportClient.prepareIndex("measurements", "measurement")
+                                    .setOpType(IndexRequest.OpType.CREATE)
+                                    .setSource(objectMapper.writeValueAsString(measurement))
+                                    .get();
+                        } catch (Exception e) {
+                            log.error("Cannot write to elasticsearch", e);
+                        }
+                    });
+        }
     }
 
     private void putMapping(TransportClient transportClient) throws CannotPutMappingException {

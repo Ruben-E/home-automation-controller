@@ -1,11 +1,11 @@
-package nl.rubenernst.iot.controller.components.subscribers;
+package nl.rubenernst.iot.controller.components.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.components.observables.SerialReaderObservable;
+import nl.rubenernst.iot.controller.components.observables.gateway.GatewayObservable;
+import nl.rubenernst.iot.controller.data.NodeManager;
 import nl.rubenernst.iot.controller.domain.messages.InternalMessageSubType;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.MessageType;
-import nl.rubenernst.iot.controller.nodes.NodeManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -13,8 +13,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class NodeNameHandler {
     @Autowired
-    public NodeNameHandler(SerialReaderObservable serialReaderObservable, NodeManager nodeManager) {
-        serialReaderObservable.getObservable()
+    public NodeNameHandler(GatewayObservable gateway, NodeManager nodeManager) {
+        gateway.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.INTERNAL &&

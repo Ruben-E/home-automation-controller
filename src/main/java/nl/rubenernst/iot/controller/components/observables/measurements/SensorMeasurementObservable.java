@@ -1,14 +1,15 @@
-package nl.rubenernst.iot.controller.components.observables;
+package nl.rubenernst.iot.controller.components.observables.measurements;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import nl.rubenernst.iot.controller.components.observables.gateway.GatewayObservable;
+import nl.rubenernst.iot.controller.data.NodeManager;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.MessageType;
 import nl.rubenernst.iot.controller.domain.messages.SetReqMessageSubType;
 import nl.rubenernst.iot.controller.domain.nodes.Node;
 import nl.rubenernst.iot.controller.domain.nodes.Sensor;
 import nl.rubenernst.iot.controller.domain.nodes.SensorMeasurement;
-import nl.rubenernst.iot.controller.nodes.NodeManager;
 import org.javatuples.Triplet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,13 +19,13 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class SensorMeasurementObservable implements ControllerObservable {
+public class SensorMeasurementObservable {
     @Getter
     private Observable<Triplet<Node, Optional<Sensor>, SensorMeasurement>> observable;
 
     @Autowired
-    public SensorMeasurementObservable(SerialReaderObservable serialReaderObservable, NodeManager nodeManager) {
-        observable = serialReaderObservable.getObservable()
+    public SensorMeasurementObservable(GatewayObservable gateway, NodeManager nodeManager) {
+        observable = gateway.getObservable()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.SET &&

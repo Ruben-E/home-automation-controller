@@ -1,7 +1,7 @@
-package nl.rubenernst.iot.controller.components.subscribers;
+package nl.rubenernst.iot.controller.components.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.components.observables.SerialReaderObservable;
+import nl.rubenernst.iot.controller.components.observables.gateway.GatewayObservable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class Logger {
     @Autowired
-    public Logger(SerialReaderObservable serialReaderObservable) {
-        serialReaderObservable.getObservable()
+    public Logger(GatewayObservable gateway) {
+        gateway.getObservable()
                 .subscribe(
                         pair -> {
                             log.debug("Received data: " + pair);

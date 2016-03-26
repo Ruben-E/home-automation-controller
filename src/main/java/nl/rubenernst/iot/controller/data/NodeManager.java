@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.nodes;
+package nl.rubenernst.iot.controller.data;
 
 import nl.rubenernst.iot.controller.domain.nodes.Node;
 import nl.rubenernst.iot.controller.domain.nodes.NodeType;

@@ -16,18 +16,29 @@ public class ElasticSearchConfiguration {
     private TransportClient transportClient;
 
     @Bean
-    public TransportClient client(@Value("${elasticsearch.cluster.name}") String clusterName, @Value("${elasticsearch.cluster.host}") String host) throws UnknownHostException {
-        transportClient = TransportClient.builder()
-                .settings(Settings.builder()
-                        .put("cluster.name", clusterName)
-                        .build())
-                .build()
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), 9300));
-        return transportClient;
+    public boolean elasticSearchEnabled(@Value("${elasticsearch.enabled}") boolean enabled) {
+        return enabled;
+    }
+
+    @Bean
+    public TransportClient client(boolean elasticSearchEnabled, @Value("${elasticsearch.cluster.name}") String clusterName, @Value("${elasticsearch.cluster.host}") String host) throws UnknownHostException {
+        if (elasticSearchEnabled) {
+            transportClient = TransportClient.builder()
+                    .settings(Settings.builder()
+                            .put("cluster.name", clusterName)
+                            .build())
+                    .build()
+                    .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(host), 9300));
+            return transportClient;
+        }
+
+        return null;
     }
 
     @PreDestroy
     public void destroy() {
-        transportClient.close();
+        if (transportClient != null) {
+            transportClient.close();
+        }
     }
 }
