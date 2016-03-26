@@ -28,12 +28,14 @@ public class EthernetGatewayObservable implements GatewayObservable {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             SOCKET_LISTENER.submit(() -> {
                 try {
-                    log.info("Connecting to [{}] on port [{}]", gatewayIp, gatewayPort);
+                    log.info("Connecting to [{}:{}]", gatewayIp, gatewayPort);
 
                     Socket socket = new Socket();
                     socket.setKeepAlive(true);
                     socket.connect(new InetSocketAddress(gatewayIp, gatewayPort), 5000);
                     if (socket.isConnected()) {
+                        log.info("Connected to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
+
                         OutputStream outputStream = socket.getOutputStream();
                         InputStream inputStream = socket.getInputStream();
 
