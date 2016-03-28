@@ -7,12 +7,14 @@ import nl.rubenernst.iot.controller.domain.messages.builder.MessageBuilder;
 import org.javatuples.Pair;
 import rx.Observable;
 
+import javax.annotation.PreDestroy;
 import java.io.BufferedReader;
-import java.io.InputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -21,6 +23,9 @@ import java.util.concurrent.Executors;
 public class EthernetGatewayObservable implements GatewayObservable {
     private static final ExecutorService SOCKET_LISTENER = Executors.newSingleThreadExecutor();
 
+    private boolean stopped = false;
+    private Socket socket = new Socket();
+
     @Getter
     private Observable<Pair<Message, OutputStream>> observable;
 
@@ -28,27 +33,47 @@ public class EthernetGatewayObservable implements GatewayObservable {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             SOCKET_LISTENER.submit(() -> {
                 try {
-                    log.info("Connecting to [{}:{}]", gatewayIp, gatewayPort);
+                    OutputStream outputStream = null;
+                    BufferedReader input = null;
 
-                    Socket socket = new Socket();
+                    socket = new Socket();
                     socket.setKeepAlive(true);
-                    socket.connect(new InetSocketAddress(gatewayIp, gatewayPort), 5000);
-                    if (socket.isConnected()) {
-                        log.info("Connected to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
+                    socket.setSoTimeout(1000);
 
-                        OutputStream outputStream = socket.getOutputStream();
-                        InputStream inputStream = socket.getInputStream();
+                    while (!stopped) {
+                        if (!socket.isConnected()) {
+                            log.info("Disconnected from ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
 
-                        BufferedReader input = new BufferedReader(new InputStreamReader(inputStream));
-                        while (socket.isConnected()) {
-                            String payload = input.readLine();
+                            try {
+                                log.info("Connecting to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
+                                socket.connect(new InetSocketAddress(gatewayIp, gatewayPort), 5000);
+                                log.info("Connected to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
 
-                            executorService.submit(() -> {
-                                List<Message> messages = messageBuilder.fromPayload(payload);
-                                for (Message message : messages) {
-                                    subscriber.onNext(new Pair<>(message, outputStream));
-                                }
-                            });
+                                outputStream = socket.getOutputStream();
+                                input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                            } catch (Exception e) {
+                                log.info("Unable to connect to the gateway on [{}:{}]. Retrying in 1000ms.", gatewayIp, gatewayPort);
+                                Thread.sleep(1000);
+                                continue;
+                            }
+                        }
+
+                        if (socket.isConnected() && outputStream != null && input != null) {
+                            try {
+                                String payload = input.readLine();
+
+                                final OutputStream finalOutputStream = outputStream;
+                                executorService.submit(() -> {
+                                    List<Message> messages = messageBuilder.fromPayload(payload);
+                                    for (Message message : messages) {
+                                        subscriber.onNext(new Pair<>(message, finalOutputStream));
+                                    }
+                                });
+                            } catch (SocketTimeoutException e) {
+                                log.trace("Didn't get data within 1000ms.");
+                            } catch (Exception e) {
+                                log.debug("Got exception. Continuing");
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -60,5 +85,11 @@ public class EthernetGatewayObservable implements GatewayObservable {
                 .doOnError(throwable -> {
                     log.error("Got exception", throwable);
                 });
+    }
+
+    @PreDestroy
+    public void preDestroy() throws IOException {
+        stopped = true;
+        socket.close();
     }
 }
