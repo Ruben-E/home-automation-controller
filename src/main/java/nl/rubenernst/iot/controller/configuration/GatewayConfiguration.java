@@ -1,5 +1,6 @@
 package nl.rubenernst.iot.controller.configuration;
 
+import nl.rubenernst.iot.controller.components.observables.gateway.DebugGatewayObservable;
 import nl.rubenernst.iot.controller.components.observables.gateway.GatewayObservable;
 import nl.rubenernst.iot.controller.components.observables.gateway.EthernetGatewayObservable;
 import nl.rubenernst.iot.controller.components.observables.gateway.SerialGatewayObservable;
@@ -24,7 +25,9 @@ public class GatewayConfiguration {
             return constructEthernetGatewayObservable(messageBuilder, executorService, gatewayIp, gatewayPort);
         } else if (gatewayType == GatewayType.SERIAL) {
             return constructSerialGatewayObservable(messageBuilder, executorService);
-        }
+        } else if (gatewayType == GatewayType.DEBUG) {
+        return constructDebugGatewayObservable(executorService);
+    }
 
         throw new IllegalArgumentException("No gateway observable found for [" + gatewayType + "]");
     }
@@ -35,5 +38,9 @@ public class GatewayConfiguration {
 
     private GatewayObservable constructEthernetGatewayObservable(MessageBuilder messageBuilder, ExecutorService executorService, String gatewayIp, int gatewayPort) {
         return new EthernetGatewayObservable(messageBuilder, executorService, gatewayIp, gatewayPort);
+    }
+
+    private GatewayObservable constructDebugGatewayObservable(ExecutorService executorService) {
+        return new DebugGatewayObservable(executorService);
     }
 }
