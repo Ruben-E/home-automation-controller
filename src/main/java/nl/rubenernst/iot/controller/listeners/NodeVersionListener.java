@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.consumers;
+package nl.rubenernst.iot.controller.listeners;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.data.NodeManager;
@@ -9,15 +9,15 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class NodeNameConsumer {
+public class NodeVersionListener {
     @Autowired
-    public NodeNameConsumer(MessageFilter nodeNameMessageFilter, NodeManager nodeManager) {
-        nodeNameMessageFilter.getMessages()
+    public NodeVersionListener(MessageFilter nodeVersionMessageFilter, NodeManager nodeManager) {
+        nodeVersionMessageFilter.getMessages()
                 .subscribe(pair -> {
                     Message message = pair.getValue0();
                     int nodeId = message.getNodeId();
 
-                    nodeManager.setName(nodeId, message.getPayload());
+                    nodeManager.setVersion(nodeId, message.getPayload());
                 });
     }
 }

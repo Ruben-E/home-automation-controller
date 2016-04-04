@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.handlers;
+package nl.rubenernst.iot.controller.listeners;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.gateways.Gateway;
@@ -7,9 +7,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class Logger {
+public class LoggerListener {
     @Autowired
-    public Logger(Gateway gateway) {
+    public LoggerListener(Gateway gateway) {
         gateway.getGateway()
                 .subscribe(
                         pair -> {
