@@ -2,7 +2,7 @@ package nl.rubenernst.iot.controller.components.observables.measurements;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.components.observables.gateway.GatewayObservable;
+import nl.rubenernst.iot.controller.gateways.Gateway;
 import nl.rubenernst.iot.controller.data.NodeManager;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.MessageType;
@@ -24,8 +24,8 @@ public class SensorMeasurementObservable {
     private Observable<Triplet<Node, Optional<Sensor>, SensorMeasurement>> observable;
 
     @Autowired
-    public SensorMeasurementObservable(GatewayObservable gateway, NodeManager nodeManager) {
-        observable = gateway.getObservable()
+    public SensorMeasurementObservable(Gateway gateway, NodeManager nodeManager) {
+        observable = gateway.getGateway()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.SET &&

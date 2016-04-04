@@ -1,10 +1,14 @@
-package nl.rubenernst.iot.controller.components.observables.gateway;
+package nl.rubenernst.iot.controller.gateways;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.builder.MessageBuilder;
 import org.javatuples.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 import rx.Observable;
 import rx.schedulers.Schedulers;
 
@@ -20,14 +24,17 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
-public class EthernetGatewayObservable implements GatewayObservable {
+@Component
+@ConditionalOnExpression("'${gateway.type}'=='ethernet'")
+public class EthernetGateway implements Gateway {
     private boolean stopped = false;
     private Socket socket = new Socket();
 
     @Getter
-    private Observable<Pair<Message, OutputStream>> observable;
+    private Observable<Pair<Message, OutputStream>> gateway;
 
-    public EthernetGatewayObservable(MessageBuilder messageBuilder, ExecutorService executorService, String gatewayIp, int gatewayPort) {
+    @Autowired
+    public EthernetGateway(MessageBuilder messageBuilder, ExecutorService executorService, @Value("${gateway.ip}") String gatewayIp, @Value("${gateway.port}") int gatewayPort) {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             try {
                 OutputStream outputStream = null;
@@ -42,9 +49,7 @@ public class EthernetGatewayObservable implements GatewayObservable {
                         log.info("Disconnected from ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
 
                         try {
-                            log.info("Connecting to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
-                            socket.connect(new InetSocketAddress(gatewayIp, gatewayPort), 5000);
-                            log.info("Connected to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
+                            connectSocketTo(gatewayIp, gatewayPort);
 
                             outputStream = socket.getOutputStream();
                             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -74,15 +79,21 @@ public class EthernetGatewayObservable implements GatewayObservable {
                 subscriber.onError(e);
             }
         });
-        this.observable = observable.share()
+        this.gateway = observable.share()
                 .doOnError(throwable -> {
                     log.error("Got exception", throwable);
                 })
                 .subscribeOn(Schedulers.from(executorService));
     }
 
+    private void connectSocketTo(String gatewayIp, int gatewayPort) throws IOException {
+        log.info("Connecting to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
+        socket.connect(new InetSocketAddress(gatewayIp, gatewayPort), 5000);
+        log.info("Connected to ethernet gateway on [{}:{}]", gatewayIp, gatewayPort);
+    }
+
     @PreDestroy
-    public void preDestroy() throws IOException {
+    public void stop() throws IOException {
         stopped = true;
         socket.close();
     }

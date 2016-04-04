@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.components.handlers;
+package nl.rubenernst.iot.controller.handlers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

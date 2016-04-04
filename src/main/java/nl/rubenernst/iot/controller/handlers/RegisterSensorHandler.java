@@ -1,7 +1,7 @@
-package nl.rubenernst.iot.controller.components.handlers;
+package nl.rubenernst.iot.controller.handlers;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.components.observables.gateway.GatewayObservable;
+import nl.rubenernst.iot.controller.gateways.Gateway;
 import nl.rubenernst.iot.controller.data.NodeManager;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.MessageType;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class RegisterSensorHandler {
     @Autowired
-    public RegisterSensorHandler(GatewayObservable gateway, NodeManager nodeManager) {
-        gateway.getObservable()
+    public RegisterSensorHandler(Gateway gateway, NodeManager nodeManager) {
+        gateway.getGateway()
                 .filter(pair -> {
                     Message message = pair.getValue0();
                     return message.getMessageType() == MessageType.PRESENTATION &&

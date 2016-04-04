@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.components.observables.gateway;
+package nl.rubenernst.iot.controller.gateways;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
@@ -9,6 +9,9 @@ import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.builder.MessageBuilder;
 import nl.rubenernst.iot.controller.exceptions.NoPortAvailableException;
 import org.javatuples.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 import rx.Observable;
 
 import java.io.BufferedReader;
@@ -19,7 +22,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
-public class SerialGatewayObservable implements GatewayObservable {
+@Component
+@ConditionalOnExpression("'${gateway.type}'=='serial'")
+public class SerialGateway implements Gateway {
     private static final String PORT_NAMES[] = {
             "/dev/cu", // Mac OS X
             "/dev/usbdev", // Linux
@@ -29,9 +34,10 @@ public class SerialGatewayObservable implements GatewayObservable {
     };
 
     @Getter
-    private Observable<Pair<Message, OutputStream>> observable;
+    private Observable<Pair<Message, OutputStream>> gateway;
 
-    public SerialGatewayObservable(MessageBuilder messageBuilder, ExecutorService executorService) {
+    @Autowired
+    public SerialGateway(MessageBuilder messageBuilder, ExecutorService executorService) {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             try {
                 CommPortIdentifier portIdentifier = null;
@@ -88,7 +94,7 @@ public class SerialGatewayObservable implements GatewayObservable {
                 executorService.submit(() -> subscriber.onError(e));
             }
         });
-        this.observable = observable.share()
+        this.gateway = observable.share()
                 .doOnError(throwable -> {
                     log.error("Got exception", throwable);
                 });
