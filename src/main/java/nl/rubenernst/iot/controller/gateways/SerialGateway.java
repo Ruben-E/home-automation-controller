@@ -1,15 +1,20 @@
-package nl.rubenernst.iot.controller.components.observables.gateway;
+package nl.rubenernst.iot.controller.gateways;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import nl.rubenernst.iot.controller.components.ExceptionHandler;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.builder.MessageBuilder;
 import nl.rubenernst.iot.controller.exceptions.NoPortAvailableException;
 import org.javatuples.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.stereotype.Component;
 import rx.Observable;
+import rx.schedulers.Schedulers;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -19,7 +24,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 @Slf4j
-public class SerialGatewayObservable implements GatewayObservable {
+@Component
+@ConditionalOnExpression("'${gateway.type}'=='serial'")
+public class SerialGateway implements Gateway {
     private static final String PORT_NAMES[] = {
             "/dev/cu", // Mac OS X
             "/dev/usbdev", // Linux
@@ -29,9 +36,10 @@ public class SerialGatewayObservable implements GatewayObservable {
     };
 
     @Getter
-    private Observable<Pair<Message, OutputStream>> observable;
+    private Observable<Pair<Message, OutputStream>> gateway;
 
-    public SerialGatewayObservable(MessageBuilder messageBuilder, ExecutorService executorService) {
+    @Autowired
+    public SerialGateway(MessageBuilder messageBuilder, ExecutorService executorService, ExceptionHandler exceptionHandler) {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             try {
                 CommPortIdentifier portIdentifier = null;
@@ -69,15 +77,13 @@ public class SerialGatewayObservable implements GatewayObservable {
                         try {
                             if (serialPortEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE && input.ready()) {
                                 String payload = input.readLine();
-                                executorService.submit(() -> {
-                                    List<Message> messages = messageBuilder.fromPayload(payload);
-                                    for (Message message : messages) {
-                                        subscriber.onNext(new Pair<>(message, output));
-                                    }
-                                });
+                                List<Message> messages = messageBuilder.fromPayload(payload);
+                                for (Message message : messages) {
+                                    subscriber.onNext(new Pair<>(message, output));
+                                }
                             }
                         } catch (Exception e) {
-                            executorService.submit(() -> subscriber.onError(e));
+                            exceptionHandler.call(e);
                         }
                     });
                     serialPort.notifyOnDataAvailable(true);
@@ -85,12 +91,11 @@ public class SerialGatewayObservable implements GatewayObservable {
                     throw new NoPortAvailableException("There is no port available");
                 }
             } catch (Exception e) {
-                executorService.submit(() -> subscriber.onError(e));
+                exceptionHandler.call(e);
             }
         });
-        this.observable = observable.share()
-                .doOnError(throwable -> {
-                    log.error("Got exception", throwable);
-                });
+        this.gateway = observable
+                .share()
+                .subscribeOn(Schedulers.from(executorService));
     }
 }

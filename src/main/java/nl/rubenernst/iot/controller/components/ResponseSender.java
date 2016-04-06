@@ -8,7 +8,7 @@ import java.io.OutputStream;
 
 @Component
 @Slf4j
-public class ResponseHandler {
+public class ResponseSender {
     public void sendResponse(Message message, OutputStream outputStream) {
         try {
             outputStream.write(message.toResponseString().getBytes());
