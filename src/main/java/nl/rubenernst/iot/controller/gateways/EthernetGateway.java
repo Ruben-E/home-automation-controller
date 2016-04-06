@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.builder.MessageBuilder;
+import nl.rubenernst.iot.controller.components.ExceptionHandler;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +35,7 @@ public class EthernetGateway implements Gateway {
     private Observable<Pair<Message, OutputStream>> gateway;
 
     @Autowired
-    public EthernetGateway(MessageBuilder messageBuilder, ExecutorService executorService, @Value("${gateway.ip}") String gatewayIp, @Value("${gateway.port}") int gatewayPort) {
+    public EthernetGateway(MessageBuilder messageBuilder, ExecutorService executorService, ExceptionHandler exceptionHandler, @Value("${gateway.ip}") String gatewayIp, @Value("${gateway.port}") int gatewayPort) {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
             try {
                 OutputStream outputStream = null;
@@ -76,13 +77,11 @@ public class EthernetGateway implements Gateway {
                     }
                 }
             } catch (Exception e) {
-                subscriber.onError(e);
+                exceptionHandler.call(e);
             }
         });
-        this.gateway = observable.share()
-                .doOnError(throwable -> {
-                    log.error("Got exception", throwable);
-                })
+        this.gateway = observable
+                .share()
                 .subscribeOn(Schedulers.from(executorService));
     }
 

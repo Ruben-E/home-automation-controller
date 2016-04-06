@@ -1,8 +1,9 @@
-package nl.rubenernst.iot.controller.handlers;
+package nl.rubenernst.iot.controller.listeners;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.components.observables.measurements.SensorMeasurementObservable;
+import nl.rubenernst.iot.controller.components.ExceptionHandler;
+import nl.rubenernst.iot.controller.converters.SensorMeasurementConverter;
 import nl.rubenernst.iot.controller.domain.Measurement;
 import nl.rubenernst.iot.controller.domain.nodes.Node;
 import nl.rubenernst.iot.controller.domain.nodes.Sensor;
@@ -21,13 +22,13 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-public class SensorMeasurementHandler {
+public class SensorMeasurementListener {
     @Autowired
-    public SensorMeasurementHandler(boolean elasticSearchEnabled, SensorMeasurementObservable sensorMeasurementObservable, TransportClient transportClient, ObjectMapper objectMapper) throws CannotPutMappingException {
+    public SensorMeasurementListener(boolean elasticSearchEnabled, SensorMeasurementConverter sensorMeasurementConverter, TransportClient transportClient, ObjectMapper objectMapper, ExceptionHandler exceptionHandler) throws CannotPutMappingException {
         if (elasticSearchEnabled) {
             putMapping(transportClient);
 
-            sensorMeasurementObservable.getObservable()
+            sensorMeasurementConverter.getMeasurements()
                     .subscribe(triplet -> {
                         try {
                             Measurement measurement = getMeasurement(triplet);
@@ -39,7 +40,7 @@ public class SensorMeasurementHandler {
                         } catch (Exception e) {
                             log.error("Cannot write to elasticsearch", e);
                         }
-                    });
+                    }, exceptionHandler);
         }
     }
 

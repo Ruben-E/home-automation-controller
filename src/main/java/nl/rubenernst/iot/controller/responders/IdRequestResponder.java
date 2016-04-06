@@ -1,7 +1,7 @@
 package nl.rubenernst.iot.controller.responders;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.components.ResponseHandler;
+import nl.rubenernst.iot.controller.components.ResponseSender;
 import nl.rubenernst.iot.controller.data.NodeManager;
 import nl.rubenernst.iot.controller.domain.messages.InternalMessage;
 import nl.rubenernst.iot.controller.domain.messages.InternalMessageSubType;
@@ -17,7 +17,7 @@ import java.io.OutputStream;
 @Slf4j
 public class IdRequestResponder {
     @Autowired
-    public IdRequestResponder(MessageFilter idRequestMessageFilter, ResponseHandler responseHandler, NodeManager nodeManager) {
+    public IdRequestResponder(MessageFilter idRequestMessageFilter, ResponseSender responseSender, NodeManager nodeManager) {
         idRequestMessageFilter.getMessages()
                 .subscribe(pair -> {
                     OutputStream outputStream = pair.getValue1();
@@ -26,7 +26,7 @@ public class IdRequestResponder {
                     Node node = nodeManager.createNode();
 
                     InternalMessage responseMessage = new InternalMessage(message.getNodeId(), message.getSensorId(), InternalMessageSubType.I_ID_RESPONSE, 0, String.valueOf(node.getId()));
-                    responseHandler.sendResponse(responseMessage, outputStream);
+                    responseSender.sendResponse(responseMessage, outputStream);
                 });
     }
 }

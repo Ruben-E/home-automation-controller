@@ -1,15 +1,13 @@
-package nl.rubenernst.iot.controller.components.observables.measurements;
+package nl.rubenernst.iot.controller.converters;
 
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.gateways.Gateway;
 import nl.rubenernst.iot.controller.data.NodeManager;
 import nl.rubenernst.iot.controller.domain.messages.Message;
-import nl.rubenernst.iot.controller.domain.messages.MessageType;
 import nl.rubenernst.iot.controller.domain.messages.SetReqMessageSubType;
 import nl.rubenernst.iot.controller.domain.nodes.Node;
 import nl.rubenernst.iot.controller.domain.nodes.Sensor;
 import nl.rubenernst.iot.controller.domain.nodes.SensorMeasurement;
+import nl.rubenernst.iot.controller.message_filters.set.SensorMeasurementMessageFilter;
 import org.javatuples.Triplet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,19 +16,14 @@ import rx.Observable;
 import java.util.Optional;
 
 @Component
-@Slf4j
-public class SensorMeasurementObservable {
+public class SensorMeasurementConverter implements Converter {
+
     @Getter
-    private Observable<Triplet<Node, Optional<Sensor>, SensorMeasurement>> observable;
+    private final Observable<Triplet<Node, Optional<Sensor>, SensorMeasurement>> measurements;
 
     @Autowired
-    public SensorMeasurementObservable(Gateway gateway, NodeManager nodeManager) {
-        observable = gateway.getGateway()
-                .filter(pair -> {
-                    Message message = pair.getValue0();
-                    return message.getMessageType() == MessageType.SET &&
-                            message.getSensorId() < 255;
-                })
+    public SensorMeasurementConverter(SensorMeasurementMessageFilter messageFilter, NodeManager nodeManager) {
+        measurements = messageFilter.getMessages()
                 .map(pair -> {
                     Message message = pair.getValue0();
                     int nodeId = message.getNodeId();
@@ -42,9 +35,6 @@ public class SensorMeasurementObservable {
 
                     return new Triplet<>(node, sensor, sensorMeasurement);
                 })
-                .share()
-                .doOnError(throwable -> {
-                    log.error("Got exception", throwable);
-                });
+                .share();
     }
 }

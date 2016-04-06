@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.domain.messages.Message;
 import nl.rubenernst.iot.controller.domain.messages.MessageType;
 import nl.rubenernst.iot.controller.domain.messages.SetReqMessageSubType;
+import nl.rubenernst.iot.controller.components.ExceptionHandler;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -24,10 +25,10 @@ public class DebugGateway implements Gateway {
     private Observable<Pair<Message, OutputStream>> gateway;
 
     @Autowired
-    public DebugGateway(ExecutorService executorService) {
+    public DebugGateway(ExecutorService executorService, ExceptionHandler exceptionHandler) {
         Observable<Pair<Message, OutputStream>> observable = Observable.create(subscriber -> {
-            try {
-                while (true) {
+            while (true) {
+                try {
                     subscriber.onNext(new Pair<Message, OutputStream>(new Message(1, 1, MessageType.SET, SetReqMessageSubType.V_TEMP, 0, "10.0"), new OutputStream() {
                         @Override
                         public void write(int b) throws IOException {
@@ -36,17 +37,13 @@ public class DebugGateway implements Gateway {
                     }));
 
                     Thread.sleep(10);
+                } catch (Exception e) {
+                    exceptionHandler.call(e);
                 }
-
-            } catch (Exception e) {
-                executorService.submit(() -> subscriber.onError(e));
             }
         });
         this.gateway = observable
                 .share()
-                .doOnError(throwable -> {
-                    log.error("Got exception", throwable);
-                })
                 .subscribeOn(Schedulers.from(executorService));
     }
 }
