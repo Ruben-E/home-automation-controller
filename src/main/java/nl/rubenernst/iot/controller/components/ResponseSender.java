@@ -1,7 +1,7 @@
 package nl.rubenernst.iot.controller.components;
 
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.domain.messages.Message;
+import nl.rubenernst.iot.controller.domain.mysensors.Message;
 import org.springframework.stereotype.Component;
 
 import java.io.OutputStream;

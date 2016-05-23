@@ -3,11 +3,11 @@ package nl.rubenernst.iot.controller.listeners;
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.components.ExceptionHandler;
 import nl.rubenernst.iot.controller.data.NodeManager;
-import nl.rubenernst.iot.controller.domain.messages.Message;
-import nl.rubenernst.iot.controller.domain.messages.PresentationMessageSubType;
-import nl.rubenernst.iot.controller.domain.nodes.Sensor;
-import nl.rubenernst.iot.controller.domain.nodes.SensorType;
-import nl.rubenernst.iot.controller.message_filters.MessageFilter;
+import nl.rubenernst.iot.controller.domain.Sensor;
+import nl.rubenernst.iot.controller.domain.SensorType;
+import nl.rubenernst.iot.controller.domain.mysensors.Message;
+import nl.rubenernst.iot.controller.domain.mysensors.PresentationMessageSubType;
+import nl.rubenernst.iot.controller.filters.SensorPresentationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class SensorPresentationListener {
     @Autowired
-    public SensorPresentationListener(MessageFilter sensorPresentationMessageFilter, NodeManager nodeManager, ExceptionHandler exceptionHandler) {
-        sensorPresentationMessageFilter.getMessages()
+    public SensorPresentationListener(SensorPresentationFilter sensorPresentationFilter, NodeManager nodeManager, ExceptionHandler exceptionHandler) {
+        sensorPresentationFilter.getMessages()
                 .subscribe(pair -> {
                     Message message = pair.getValue0();
                     int nodeId = message.getNodeId();

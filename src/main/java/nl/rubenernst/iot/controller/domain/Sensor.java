@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.domain.nodes;
+package nl.rubenernst.iot.controller.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

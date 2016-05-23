@@ -1,7 +1,7 @@
-package nl.rubenernst.iot.controller.domain.nodes;
+package nl.rubenernst.iot.controller.domain;
 
 import lombok.Getter;
-import nl.rubenernst.iot.controller.domain.messages.PresentationMessageSubType;
+import nl.rubenernst.iot.controller.domain.mysensors.PresentationMessageSubType;
 
 @Getter
 public enum SensorType {

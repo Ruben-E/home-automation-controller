@@ -1,8 +1,8 @@
 package nl.rubenernst.iot.controller.data;
 
-import nl.rubenernst.iot.controller.domain.nodes.Node;
-import nl.rubenernst.iot.controller.domain.nodes.NodeType;
-import nl.rubenernst.iot.controller.domain.nodes.Sensor;
+import nl.rubenernst.iot.controller.domain.Node;
+import nl.rubenernst.iot.controller.domain.NodeType;
+import nl.rubenernst.iot.controller.domain.Sensor;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

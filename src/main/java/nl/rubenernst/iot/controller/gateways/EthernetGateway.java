@@ -2,8 +2,8 @@ package nl.rubenernst.iot.controller.gateways;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import nl.rubenernst.iot.controller.domain.messages.Message;
-import nl.rubenernst.iot.controller.domain.messages.builder.MessageBuilder;
+import nl.rubenernst.iot.controller.domain.mysensors.Message;
+import nl.rubenernst.iot.controller.domain.mysensors.builder.MessageBuilder;
 import nl.rubenernst.iot.controller.components.ExceptionHandler;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;

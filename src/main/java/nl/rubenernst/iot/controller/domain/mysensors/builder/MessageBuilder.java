@@ -1,6 +1,6 @@
-package nl.rubenernst.iot.controller.domain.messages.builder;
+package nl.rubenernst.iot.controller.domain.mysensors.builder;
 
-import nl.rubenernst.iot.controller.domain.messages.*;
+import nl.rubenernst.iot.controller.domain.mysensors.*;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

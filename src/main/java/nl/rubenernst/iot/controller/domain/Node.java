@@ -1,6 +1,7 @@
-package nl.rubenernst.iot.controller.domain.nodes;
+package nl.rubenernst.iot.controller.domain;
 
 import lombok.Data;
+import lombok.Singular;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +13,8 @@ public class Node {
     private NodeType nodeType;
     private String name;
     private String version;
-    private List<Sensor> sensors;
-
-    public List<Sensor> getSensors() {
-        if (sensors == null) {
-            sensors = new ArrayList<>();
-        }
-
-        return sensors;
-    }
+    @Singular
+    private List<Sensor> sensors = new ArrayList<>();
 
     public Optional<Sensor> getSensor(int id) {
         return getSensors().stream().filter(sensor -> sensor.getId() == id).findFirst();

@@ -24,9 +24,9 @@
         <java.version>1.8</java.version>
     </properties>
 
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
@@ -69,6 +69,11 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.7.3</version>
         </dependency>
+        <dependency>
+            <groupId>com.microsoft.azure.iothub-java-client</groupId>
+            <artifactId>iothub-java-service-client</artifactId>
+            <version>1.0.5</version>
+        </dependency>
 
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -86,39 +91,6 @@
 
     <build>
         <plugins>
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-compiler-plugin</artifactId>-->
-                <!--<version>3.5.1</version>-->
-                <!--<configuration>-->
-                    <!--<compilerVersion>1.8</compilerVersion>-->
-                    <!--<source>1.8</source>-->
-                    <!--<target>1.8</target>-->
-                    <!--&lt;!&ndash;<annotationProcessors>&ndash;&gt;-->
-                        <!--&lt;!&ndash;<annotationProcessor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor</annotationProcessor>&ndash;&gt;-->
-                    <!--&lt;!&ndash;</annotationProcessors>&ndash;&gt;-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-assembly-plugin</artifactId>-->
-                <!--<version>2.6</version>-->
-                <!--<configuration>-->
-                    <!--<descriptorRefs>-->
-                        <!--<descriptorRef>jar-with-dependencies</descriptorRef>-->
-                    <!--</descriptorRefs>-->
-
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>assemble-all</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>single</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

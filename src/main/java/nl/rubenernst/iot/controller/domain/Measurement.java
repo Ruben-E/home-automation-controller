@@ -3,9 +3,7 @@ package nl.rubenernst.iot.controller.domain;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
-import nl.rubenernst.iot.controller.domain.messages.SetReqMessageSubType;
-import nl.rubenernst.iot.controller.domain.nodes.Node;
-import nl.rubenernst.iot.controller.domain.nodes.Sensor;
+import nl.rubenernst.iot.controller.domain.mysensors.SetReqMessageSubType;
 
 import java.util.Date;
 

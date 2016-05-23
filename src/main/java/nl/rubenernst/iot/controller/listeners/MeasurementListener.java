@@ -3,35 +3,32 @@ package nl.rubenernst.iot.controller.listeners;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.components.ExceptionHandler;
-import nl.rubenernst.iot.controller.converters.SensorMeasurementConverter;
 import nl.rubenernst.iot.controller.domain.Measurement;
-import nl.rubenernst.iot.controller.domain.nodes.Node;
-import nl.rubenernst.iot.controller.domain.nodes.Sensor;
-import nl.rubenernst.iot.controller.domain.nodes.SensorMeasurement;
+import nl.rubenernst.iot.controller.domain.NodeMessage;
+import nl.rubenernst.iot.controller.domain.mysensors.SetReqMessageSubType;
 import nl.rubenernst.iot.controller.exceptions.CannotPutMappingException;
+import nl.rubenernst.iot.controller.filters.MeasurementFilter;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.javatuples.Triplet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.Optional;
 
 @Component
 @Slf4j
-public class SensorMeasurementListener {
+public class MeasurementListener {
     @Autowired
-    public SensorMeasurementListener(boolean elasticSearchEnabled, SensorMeasurementConverter sensorMeasurementConverter, TransportClient transportClient, ObjectMapper objectMapper, ExceptionHandler exceptionHandler) throws CannotPutMappingException {
+    public MeasurementListener(boolean elasticSearchEnabled, MeasurementFilter measurementFilter, TransportClient transportClient, ObjectMapper objectMapper, ExceptionHandler exceptionHandler) throws CannotPutMappingException {
         if (elasticSearchEnabled) {
             putMapping(transportClient);
 
-            sensorMeasurementConverter.getMeasurements()
-                    .subscribe(triplet -> {
+            measurementFilter.getMessages()
+                    .subscribe(pair -> {
                         try {
-                            Measurement measurement = getMeasurement(triplet);
+                            Measurement measurement = getMeasurement(pair.getValue0());
 
                             transportClient.prepareIndex("measurements", "measurement")
                                     .setOpType(IndexRequest.OpType.CREATE)
@@ -95,12 +92,8 @@ public class SensorMeasurementListener {
         }
     }
 
-    private Measurement getMeasurement(Triplet<Node, Optional<Sensor>, SensorMeasurement> triplet) {
-        Node node = triplet.getValue0();
-        Optional<Sensor> sensor = triplet.getValue1();
-        SensorMeasurement sensorMeasurement = triplet.getValue2();
-
-        String data = sensorMeasurement.getPayload();
+    private Measurement getMeasurement(NodeMessage nodeMessage) {
+        String data = nodeMessage.getPayload();
         Integer dataAsInteger = null;
         try {
             dataAsInteger = Integer.parseInt(data);
@@ -117,9 +110,9 @@ public class SensorMeasurementListener {
 
         return Measurement.builder()
                 .date(new Date())
-                .node(node)
-                .sensor(sensor.isPresent() ? sensor.get() : null)
-                .type(sensorMeasurement.getReqMessageSubType())
+                .node(nodeMessage.getNode())
+                .sensor(nodeMessage.getSensor())
+                .type((SetReqMessageSubType) nodeMessage.getMessageSubType())
                 .data(data)
                 .dataAsInteger(dataAsInteger)
                 .dataAsFloat(dataAsFloat)
