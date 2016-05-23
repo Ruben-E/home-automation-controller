@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.listeners;
+package nl.rubenernst.iot.controller.actors;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.components.ExceptionHandler;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class SensorPresentationListener {
+public class SensorRegistrationActor {
     @Autowired
-    public SensorPresentationListener(SensorPresentationFilter sensorPresentationFilter, NodeManager nodeManager, ExceptionHandler exceptionHandler) {
+    public SensorRegistrationActor(SensorPresentationFilter sensorPresentationFilter, NodeManager nodeManager, ExceptionHandler exceptionHandler) {
         sensorPresentationFilter.getMessages()
                 .subscribe(pair -> {
                     Message message = pair.getValue0();

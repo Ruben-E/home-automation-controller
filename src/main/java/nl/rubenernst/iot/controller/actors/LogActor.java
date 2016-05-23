@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.listeners;
+package nl.rubenernst.iot.controller.actors;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.components.ExceptionHandler;
@@ -8,9 +8,9 @@ import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j
-public class LoggerListener {
+public class LogActor {
     @Autowired
-    public LoggerListener(Gateway gateway, ExceptionHandler exceptionHandler) {
+    public LogActor(Gateway gateway, ExceptionHandler exceptionHandler) {
         gateway.getGateway()
                 .subscribe(
                         pair -> {

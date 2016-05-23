@@ -19,7 +19,7 @@ public class MeasurementFilter implements Filter {
 
     @Autowired
     public MeasurementFilter(NodeMessageConverter nodeMessageConverter) {
-        messages = nodeMessageConverter.getMeasurements()
+        messages = nodeMessageConverter.getMessages()
                 .filter(pair -> {
                     NodeMessage nodeMessage = pair.getValue0();
                     return nodeMessage.getMessageType() == MessageType.SET &&

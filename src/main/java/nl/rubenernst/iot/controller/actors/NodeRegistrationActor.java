@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.responders;
+package nl.rubenernst.iot.controller.actors;
 
 import lombok.extern.slf4j.Slf4j;
 import nl.rubenernst.iot.controller.components.ResponseSender;
@@ -15,9 +15,9 @@ import java.io.OutputStream;
 
 @Component
 @Slf4j
-public class IdRequestResponder {
+public class NodeRegistrationActor {
     @Autowired
-    public IdRequestResponder(IdRequestFilter idRequestFilter, ResponseSender responseSender, NodeManager nodeManager) {
+    public NodeRegistrationActor(IdRequestFilter idRequestFilter, ResponseSender responseSender, NodeManager nodeManager) {
         idRequestFilter.getMessages()
                 .subscribe(pair -> {
                     OutputStream outputStream = pair.getValue1();

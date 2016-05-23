@@ -1,4 +1,4 @@
-package nl.rubenernst.iot.controller.listeners;
+package nl.rubenernst.iot.controller.actors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +19,9 @@ import java.util.Date;
 
 @Component
 @Slf4j
-public class MeasurementListener {
+public class MeasurementSaverActor {
     @Autowired
-    public MeasurementListener(boolean elasticSearchEnabled, MeasurementFilter measurementFilter, TransportClient transportClient, ObjectMapper objectMapper, ExceptionHandler exceptionHandler) throws CannotPutMappingException {
+    public MeasurementSaverActor(boolean elasticSearchEnabled, MeasurementFilter measurementFilter, TransportClient transportClient, ObjectMapper objectMapper, ExceptionHandler exceptionHandler) throws CannotPutMappingException {
         if (elasticSearchEnabled) {
             putMapping(transportClient);
 

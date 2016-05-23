@@ -19,11 +19,11 @@ import java.util.Optional;
 public class NodeMessageConverter implements Converter {
 
     @Getter
-    private final Observable<Pair<NodeMessage, OutputStream>> measurements;
+    private final Observable<Pair<NodeMessage, OutputStream>> messages;
 
     @Autowired
     public NodeMessageConverter(Gateway gateway, NodeManager nodeManager) {
-        measurements = gateway.getGateway()
+        messages = gateway.getGateway()
                 .map(pair -> {
                     Message message = pair.getValue0();
                     int nodeId = message.getNodeId();
