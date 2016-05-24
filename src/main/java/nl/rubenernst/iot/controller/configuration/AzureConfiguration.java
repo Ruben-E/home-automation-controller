@@ -11,13 +11,23 @@ import java.io.IOException;
 @Configuration
 public class AzureConfiguration {
     private static ServiceClient serviceClient;
-    @Bean
-    public ServiceClient serviceClient(@Value("${azure.servicebus.hostname}") String hostname, @Value("${azure.servicebus.access.key}") String accessKey, @Value("${azure.servicebus.access.key.name}") String accessKeyName) throws Exception {
-        IotHubConnectionString connectionString = IotHubConnectionStringBuilder.createConnectionString("iot-hub-ruben.azure-devices.net", new ServiceAuthenticationWithSharedAccessPolicyKey(accessKeyName, accessKey));
-        serviceClient = ServiceClient.createFromConnectionString(connectionString.toString(), IotHubServiceClientProtocol.AMQPS);
-        serviceClient.open();
 
-        return serviceClient;
+    @Bean
+    public boolean azureEnabled(@Value("${azure.servicebus.enabled}") boolean enabled) {
+        return enabled;
+    }
+
+    @Bean
+    public ServiceClient serviceClient(boolean azureEnabled, @Value("${azure.servicebus.hostname}") String hostname, @Value("${azure.servicebus.access.key}") String accessKey, @Value("${azure.servicebus.access.key.name}") String accessKeyName) throws Exception {
+        if (azureEnabled) {
+            IotHubConnectionString connectionString = IotHubConnectionStringBuilder.createConnectionString("iot-hub-ruben.azure-devices.net", new ServiceAuthenticationWithSharedAccessPolicyKey(accessKeyName, accessKey));
+            serviceClient = ServiceClient.createFromConnectionString(connectionString.toString(), IotHubServiceClientProtocol.AMQPS);
+            serviceClient.open();
+
+            return serviceClient;
+        }
+
+        return null;
     }
 
     @PreDestroy
