@@ -36,7 +36,7 @@ public class DebugGateway implements Gateway {
                         }
                     }));
 
-                    Thread.sleep(10);
+                    Thread.sleep(1000);
                 } catch (Exception e) {
                     exceptionHandler.call(e);
                 }
